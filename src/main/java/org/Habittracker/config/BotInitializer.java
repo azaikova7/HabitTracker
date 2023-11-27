@@ -1,7 +1,7 @@
-package org.example.config;
+package org.Habittracker.config;
 
 import lombok.extern.slf4j.Slf4j;
-import org.example.service.TelegramBot;
+import org.Habittracker.service.TelegramBot;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
