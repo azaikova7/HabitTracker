@@ -97,16 +97,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
 
     }
-    private void addHabit(long chatId){
-        sendMessage(chatId, "Введите привычку:\n");
 
-    }
-        if(update.hasMessage() && update.getMessage().hasText()){
-            String messageText = update.getMessage().getText();
-            long chatId = update.getMessage().getChatId();
-
-
-    }
     private void registerUser(Message msg){
         if(userRepository.findById(msg.getChatId()).isEmpty()){
             var chatId = msg.getChatId();
