@@ -15,9 +15,14 @@ public class User {
     private String lastName;
     private String userName;
     private ArrayList<String> Habits = new ArrayList<String>();
+    private String timeNotification;
 
     private Timestamp registeredAt;
 
+    public void setTime(String time){
+        this.timeNotification = time;
+    }
+    public String getTime(){return timeNotification;}
     public Long getChatId() {
         return chatId;
     }
@@ -71,7 +76,8 @@ public class User {
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", userName='" + userName + '\'' +
-                ", registeredAt=" + registeredAt +
+                ", registeredAt='" + registeredAt + '\'' +
+                ", timeNotification=" + timeNotification +
                 '}';
     }
 }

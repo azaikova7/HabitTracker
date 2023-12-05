@@ -16,7 +16,7 @@ import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.sql.Timestamp;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,10 +55,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         listofCommands.add((new BotCommand("/help", "Как пользоваться ботом")));
         listofCommands.add(new BotCommand("/myhabits", "Мои привычки"));
         listofCommands.add(new BotCommand("/addhabit", "Добавить привычку"));
-        listofCommands.add(new BotCommand("/mypoints", "Мои баллы"));
         listofCommands.add(new BotCommand("/progress", "Прогресс"));
-        listofCommands.add(new BotCommand("/deletedata", "Удалить информацию обо мне"));
-        listofCommands.add(new BotCommand("/settings", "Настройки"));
         try{
             this.execute(new SetMyCommands(listofCommands, new BotCommandScopeDefault(), null));
         }
@@ -66,6 +63,7 @@ public class TelegramBot extends TelegramLongPollingBot {
             log.error("Error setting bot's command list: " + e.getMessage());
         }
     }
+
     @Override
     public String getBotUsername() {
         return config.getBotName();
@@ -82,18 +80,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         if(update.hasMessage() && update.getMessage().hasText()){
             String messageText = update.getMessage().getText();
             long chatId = update.getMessage().getChatId();
-            switch (messageText) {
-                case "/start":
-                    registerUser(update.getMessage());
-                    startCommandReceived(chatId, update.getMessage().getChat().getFirstName());
-                    break;
-                case "/help":
-                    sendMessage(chatId, HELP_TEXT);
-                    break;
-                case "/addhabit":
 
-                default: sendMessage(chatId, "Сори, пока что я не знаю такую команду");
-            }
         }
 
     }
@@ -122,6 +109,21 @@ public class TelegramBot extends TelegramLongPollingBot {
                 "- Бросить курить");
         log.info("Replied to user " + name);
         sendMessage(chatId, answer);
+    }
+    public void sendReminders() {
+        try (Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/tgbot", "tgbot", "tg-bot-123")) {
+            String query = "SELECT message, chat_id FROM reminders WHERE send_time <= NOW()";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+                ResultSet resultSet = preparedStatement.executeQuery();
+                while (resultSet.next()) {
+                    String message = resultSet.getString("message");
+                    long chatId = resultSet.getLong("chat_id");
+                    sendMessage(chatId, message);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
     private void sendMessage(long chatId, String textToSend){
         SendMessage message = new SendMessage();
