@@ -1,52 +1,38 @@
 package org.Habittracker.service;
 
-import com.vdurmont.emoji.EmojiParser;
 import lombok.extern.slf4j.Slf4j;
+import org.Habittracker.command.CommandContainer;
 import org.Habittracker.config.BotConfig;
 import org.Habittracker.model.User;
 import org.Habittracker.model.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.sql.*;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.Habittracker.command.CommandName.NO;
 
 @Slf4j
 @Component
 public class TelegramBot extends TelegramLongPollingBot {
     @Autowired
-
     private UserRepository userRepository;
-    final BotConfig config;
-    static final String HELP_TEXT = """
-            Вот такие команды я понимаю:
-
-            /start - приветствие
-
-            /help - информация о доступных командах
-
-            /myhabits - список моих привычек
-
-            /addhabit - добавить новую привычку
-
-            /mypoints - информация о баллах, полученных за выполнение привычек
-
-            /progress - статистика выполнения привычек в виде графика/таблицы
-
-            /deletedata - удалить всю информацию о пользователе
-
-            /settings - настройки: например, изменить привычку или время получения уведомлений
-
-            """;
+    private BotConfig config;
+    public static String COMMAND_PREFIX = "/";
+    @Value("${bot.name}")
+    String botName;
+    @Value("${bot.token}")
+    String token;
     public TelegramBot(BotConfig config){
 
         this.config=config;
@@ -64,23 +50,33 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
     }
 
+    private CommandContainer commandContainer;
+
+    public TelegramBot() {
+        this.commandContainer = new CommandContainer(new SendBotMessageServiceImpl(this));
+    }
     @Override
     public String getBotUsername() {
-        return config.getBotName();
+        return botName;
     }
 
     @Override
     public String getBotToken() {
-        return config.getToken();
+        return token;
     }
 
     @Override
     public void onUpdateReceived(Update update) {
+        registerUser(update.getMessage());
+        if (update.hasMessage() && update.getMessage().hasText()) {
+            String message = update.getMessage().getText().trim();
+            if (message.startsWith(COMMAND_PREFIX)) {
+                String commandIdentifier = message.split(" ")[0].toLowerCase();
 
-        if(update.hasMessage() && update.getMessage().hasText()){
-            String messageText = update.getMessage().getText();
-            long chatId = update.getMessage().getChatId();
-
+                commandContainer.retrieveCommand(commandIdentifier).execute(update);
+            } else {
+                commandContainer.retrieveCommand(NO.getCommandName()).execute(update);
+            }
         }
 
     }
@@ -101,16 +97,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
     }
 
-    private void startCommandReceived(long chatId, String name) {
-        String answer = EmojiParser.parseToUnicode("Привет, " + name +", я - habit tracker :heart: - я помогу тебе ослеживать и корректировать свои привычки - полезные и вредные\n"+
-                "Давай создадим твою первую привычку, чтобы приобрести или избавиться от неё\n\n"+
-                "Напиши мне, что ты хочешь выполнять, например:\n\n"+
-                "- Читать 10 страниц в день;\n\n"+
-                "- Бросить курить");
-        log.info("Replied to user " + name);
-        sendMessage(chatId, answer);
-    }
-    public void sendReminders() {
+   /* public void sendReminders() {
         try (Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/tgbot", "tgbot", "tg-bot-123")) {
             String query = "SELECT message, chat_id FROM reminders WHERE send_time <= NOW()";
             try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
@@ -145,7 +132,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         keyboardRows.add(row);
         keyboardMarkup.setKeyboard(keyboardRows);
         message.setReplyMarkup(keyboardMarkup);
-        */
+
 
         try{
             execute(message);
@@ -155,4 +142,6 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
 
     }
+
+    */
 }
