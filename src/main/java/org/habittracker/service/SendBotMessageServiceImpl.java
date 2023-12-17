@@ -1,4 +1,4 @@
-package org.Habittracker.service;
+package org.habittracker.service;
 
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.springframework.beans.factory.annotation.Autowired;

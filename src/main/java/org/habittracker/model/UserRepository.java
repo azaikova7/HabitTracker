@@ -1,4 +1,4 @@
-package org.Habittracker.model;
+package org.habittracker.model;
 
 import org.springframework.data.repository.CrudRepository;
 

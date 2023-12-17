@@ -1,4 +1,4 @@
-package org.Habittracker;
+package org.habittracker;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

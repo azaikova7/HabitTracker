@@ -1,10 +1,10 @@
-package org.Habittracker.command;
+package org.habittracker.command;
 
-import org.Habittracker.service.SendBotMessageService;
+import org.habittracker.service.SendBotMessageService;
 
 import java.util.HashMap;
 
-import static org.Habittracker.command.CommandName.*;
+import static org.habittracker.command.CommandName.*;
 
 
 public class CommandContainer {

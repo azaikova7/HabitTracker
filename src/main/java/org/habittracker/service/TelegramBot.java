@@ -1,10 +1,10 @@
-package org.Habittracker.service;
+package org.habittracker.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.Habittracker.command.CommandContainer;
-import org.Habittracker.config.BotConfig;
-import org.Habittracker.model.User;
-import org.Habittracker.model.UserRepository;
+import org.habittracker.command.CommandContainer;
+import org.habittracker.config.BotConfig;
+import org.habittracker.model.User;
+import org.habittracker.model.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -20,7 +20,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.Habittracker.command.CommandName.NO;
+import static org.habittracker.command.CommandName.NO;
 
 @Slf4j
 @Component

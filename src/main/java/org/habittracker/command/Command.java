@@ -1,4 +1,4 @@
-package org.Habittracker.command;
+package org.habittracker.command;
 
 import org.telegram.telegrambots.meta.api.objects.Update;
 
