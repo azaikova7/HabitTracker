@@ -1,4 +1,4 @@
-package org.Habittracker.command;
+package org.habittracker.command;
 
 public enum CommandName {
     START("/start"),

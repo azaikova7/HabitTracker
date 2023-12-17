@@ -1,6 +1,6 @@
-package org.Habittracker.command;
+package org.habittracker.command;
 
-import org.Habittracker.service.SendBotMessageService;
+import org.habittracker.service.SendBotMessageService;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 public class MyHabits implements Command{
