@@ -97,7 +97,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
     }
 
-   /* public void sendReminders() {
+    public void sendReminders() {
         try (Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/tgbot", "tgbot", "tg-bot-123")) {
             String query = "SELECT message, chat_id FROM reminders WHERE send_time <= NOW()";
             try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
@@ -141,7 +141,5 @@ public class TelegramBot extends TelegramLongPollingBot {
             log.error("Error occurred: " + e.getMessage());
         }
 
-    }
-
-    */
+    }*/
 }
