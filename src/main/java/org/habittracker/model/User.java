@@ -1,8 +1,11 @@
 package org.habittracker.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.validation.constraints.NotBlank;
 
+import javax.swing.plaf.nimbus.State;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 
@@ -14,15 +17,20 @@ public class User {
     private String firstName;
     private String lastName;
     private String userName;
-    private ArrayList<String> Habits = new ArrayList<String>();
-    private String timeNotification;
+
+    private String habitName;
+
+
+    public void setHabitName(String habitName) {
+        this.habitName = habitName;
+    }
+
+    public String getHabitName() {
+        return habitName;
+    }
 
     private Timestamp registeredAt;
 
-    public void setTime(String time){
-        this.timeNotification = time;
-    }
-    public String getTime(){return timeNotification;}
     public Long getChatId() {
         return chatId;
     }
@@ -62,13 +70,6 @@ public class User {
     public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
-    public void setHabits(ArrayList<String> Habits){
-        this.Habits = Habits;
-    }
-    public ArrayList<String> getHabits(){
-        return Habits;
-    }
-
     @Override
     public String toString() {
         return "User{" +
@@ -76,8 +77,7 @@ public class User {
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", userName='" + userName + '\'' +
-                ", registeredAt='" + registeredAt + '\'' +
-                ", timeNotification=" + timeNotification +
+                ", registeredAt=" + registeredAt + '\'' +
                 '}';
     }
 }

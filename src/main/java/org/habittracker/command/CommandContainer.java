@@ -17,7 +17,6 @@ public class CommandContainer {
         commandMap.put(HELP.getCommandName(), new HelpCommand(sendBotMessageService));
         commandMap.put(ADDHABIT.getCommandName(), new AddHabit(sendBotMessageService));
         commandMap.put(MYHABITS.getCommandName(), new MyHabits(sendBotMessageService));
-        commandMap.put(PROGRESS.getCommandName(), new Progress(sendBotMessageService));
         commandMap.put(NO.getCommandName(), new NoCommand(sendBotMessageService));
         unknownCommand = new UnknowCommand(sendBotMessageService);
     }

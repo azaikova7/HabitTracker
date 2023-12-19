@@ -5,8 +5,7 @@ public enum CommandName {
     HELP("/help"),
     MYHABITS("/myhabits"),
     ADDHABIT("/addhabit"),
-    NO(""),
-    PROGRESS("/progress");
+    NO("");
 
 
 
