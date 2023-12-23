@@ -1,6 +1,7 @@
 package org.habittracker.command;
 
 import org.habittracker.service.SendBotMessageService;
+import org.habittracker.service.TelegramBot;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 public class UnknowCommand implements Command{
@@ -14,6 +15,6 @@ public class UnknowCommand implements Command{
 
     @Override
     public void execute(Update update) {
-        sendBotMessageService.sendMessage(update.getMessage().getChatId().toString(), UNKNOWN_MESSAGE);
+        sendBotMessageService.sendMessage(update.getMessage().getChatId(), UNKNOWN_MESSAGE);
     }
 }

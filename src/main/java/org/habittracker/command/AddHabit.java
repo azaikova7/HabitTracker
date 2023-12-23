@@ -18,17 +18,13 @@ public class AddHabit implements Command {
     public AddHabit(SendBotMessageService sendBotMessageService) {
         this.sendBotMessageService = sendBotMessageService;
     }
-    public void execute(Update update, TelegramBot bot) {
+    public void execute(Update update) {
         Long userId = update.getMessage().getFrom().getId();
         DataBaseConnection db = new DataBaseConnection();
         User user = db.getUserById(userId);
         db.editState(userId, "NAME");
-        sendBotMessageService.sendMessage(update.getMessage().getChatId().toString(), "Введите привычку");
+        sendBotMessageService.sendMessage(update.getMessage().getChatId(), "Введите привычку");
     }
 
-    @Override
-    public void execute(Update update) {
-
-    }
 }
 

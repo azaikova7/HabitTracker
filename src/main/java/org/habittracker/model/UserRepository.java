@@ -1,4 +1,3 @@
-
 package org.habittracker.model;
 
 import org.springframework.data.jpa.repository.JpaRepository;

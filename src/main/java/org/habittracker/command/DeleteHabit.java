@@ -1,24 +1,30 @@
 package org.habittracker.command;
 
 import org.habittracker.service.DataBaseConnection;
+import org.habittracker.service.SendBotMessageServiceImpl;
 import org.habittracker.service.TelegramBot;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.habittracker.service.SendCallBack;
-
 public class DeleteHabit {
-    public void execute(Update update, TelegramBot bot) {
+    private final TelegramBot telegramBot;
+
+    public DeleteHabit(TelegramBot telegramBot) {
+        this.telegramBot = telegramBot;
+    }
+
+
+    public void execute(Update update) {
         DataBaseConnection db = new DataBaseConnection();
         List<String> taskNames = db.nameTaskCreator(update.getMessage().getFrom().getId());
         ArrayList<String> task = new ArrayList<String>();
         for (String i : taskNames){
             task.add("DELETE " + i);
         }
-        SendCallBack sendCallback = new SendCallBack();
-        sendCallback.execute(update, bot, task, "Выберите задачу");
+        SendBotMessageServiceImpl sendCallback = new SendBotMessageServiceImpl(telegramBot);
+        sendCallback.execute(update, task, "Выберите задачу");
     }
 }
 

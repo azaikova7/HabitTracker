@@ -24,12 +24,16 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import static org.habittracker.command.CommandName.NO;
+
 @Slf4j
 @Component
 public class TelegramBot extends TelegramLongPollingBot {
     @Autowired
     private UserRepository userRepository;
     private BotConfig config;
+
+    private HashMap<String, String> habit;
     public static String COMMAND_PREFIX = "/";
     @Value("${bot.name}")
     String botName;
@@ -37,23 +41,13 @@ public class TelegramBot extends TelegramLongPollingBot {
     String token;
 
     public DataBaseConnection db;
-
-
     final String botToken;
-    private HashMap<String, String> task;
-
-
-    public TelegramBot(String botName, String botToken) {
-        this.botName = botName;
-        this.botToken = botToken;
-        this.task = new HashMap<>();
-        this.db = new DataBaseConnection();
-    }
-
     public TelegramBot(BotConfig config, String botToken) {
 
         this.config = config;
         this.botToken = botToken;
+        this.habit = new HashMap<>();
+        this.db = new DataBaseConnection();
         List<BotCommand> listofCommands = new ArrayList<>();
         listofCommands.add(new BotCommand("/start", "Начало работы"));
         listofCommands.add((new BotCommand("/help", "Как пользоваться ботом")));
@@ -70,7 +64,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     public TelegramBot(String botToken) {
         this.botToken = botToken;
-        this.commandContainer = new CommandContainer(new SendBotMessageServiceImpl(this));
+        this.commandContainer = new CommandContainer(new SendBotMessageServiceImpl(this), this);
     }
 
     @Override
@@ -105,13 +99,13 @@ public class TelegramBot extends TelegramLongPollingBot {
             String data = callbackQuery.getData();
             Long userId = callbackQuery.getFrom().getId();
             if (data.startsWith("TASK")){
-                task.put("TASK", data);
+                habit.put("TASK", data);
                 ArrayList<String> action = new ArrayList<>(Arrays.asList("ACTION дедлайн", "ACTION описание", "ACTION статус", "ACTION выполняющий"));
-                SendCallBack send = new SendCallBack();
-                send.execute(update, this, action, "выберите действие");
+                SendBotMessageServiceImpl send = new SendBotMessageServiceImpl(this);
+                send.execute(update, action, "выберите действие");
             }
             if (data.startsWith("ACTION")){
-                task.put("ACTION", data);
+                habit.put("ACTION", data);
                 db.editState(userId, "EDITTASK");
                 sendMessage("Введите новые данные", callbackQuery.getMessage().getChatId().toString());
             }

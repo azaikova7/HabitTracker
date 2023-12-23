@@ -16,25 +16,20 @@ public class MyHabits implements Command {
     }
 
     @Override
-    public void execute(Update update, TelegramBot bot) {
+    public void execute(Update update) {
         Long userId = update.getMessage().getFrom().getId();
         DataBaseConnection db = new DataBaseConnection();
         List<String> tasks = db.nameTaskCreator(update.getMessage().getFrom().getId());
         if (tasks.isEmpty()) {
-            sendBotMessageService.sendMessage(update.getMessage().getChatId().toString(), "У вас нет привычек.");
+            sendBotMessageService.sendMessage(update.getMessage().getChatId(), "У вас нет привычек.");
         } else {
             StringBuilder message = new StringBuilder("Ваши привычки:\n");
             for (String task : tasks) {
                 message.append("- ").append(task).append("\n");
             }
 
-            bot.sendMessage(String.valueOf(userId), message.toString());
+            sendBotMessageService.sendMessage(update.getMessage().getChatId(), message.toString());
         }
-
-    }
-
-    @Override
-    public void execute(Update update) {
 
     }
 }

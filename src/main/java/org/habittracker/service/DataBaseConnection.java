@@ -1,6 +1,5 @@
 package org.habittracker.service;
 
-import com.jayway.jsonpath.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -8,11 +7,7 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.query.Query;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.habittracker.model.User;
-import org.habittracker.model.Habit;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.*;
 
-import java.util.HashMap;
 import java.util.List;
 
 public class DataBaseConnection {
@@ -50,9 +45,9 @@ public class DataBaseConnection {
         }
     }
     public void addTask(Update update, String name, String userName){
-        Habit userTask = new Habit();
-        userTask.setUserId(update.getMessage().getFrom().getId());
-        userTask.setHabitId(name);
+        User userTask = new User();
+        userTask.setChatId(update.getMessage().getFrom().getId());
+        userTask.setHabitName(name);
         try (Session session = sessionFactory.openSession()) {
             Transaction transaction = session.beginTransaction();
             session.save(userTask);
@@ -110,12 +105,12 @@ public class DataBaseConnection {
         }
 
     }*/
-    public List<Habit> getTasksByUserId(Long userId) {
+    public List<String> getTasksByUserId(Long userId) {
         try (Session session = sessionFactory.openSession()) {
             String hql = "FROM UserTask WHERE creatorId = :userId";
             Query query = session.createQuery(hql);
             query.setParameter("userId", userId);
-            List<Habit> tasks = query.list();
+            List<String> tasks = query.list();
             return tasks;
         }
     }
