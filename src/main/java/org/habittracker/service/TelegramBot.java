@@ -1,16 +1,21 @@
 package org.habittracker.service;
 
+import jakarta.annotation.PostConstruct;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.habittracker.command.CommandContainer;
 import org.habittracker.model.User;
 import org.habittracker.model.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
+import java.lang.String;
 
 
 import java.util.ArrayList;
@@ -19,22 +24,22 @@ import java.util.List;
 
 
 @Configuration
+@Data
 @PropertySource("application.properties")
 @Slf4j
 @Component
 public class TelegramBot extends TelegramLongPollingBot {
-    @Autowired
-    final String botName;
-    final String botToken;
+    @Value("${bot.name}")
+    String botName;
+    @Value("${bot.token}")
+    String botToken;
     private HashMap<String, String> habit;
 
-    public DataBaseConnection db;
-    private final SendBotMessageService sendBotMessageService;
+    private final DataBaseConnection db;
+    private final SendBotMessageServiceImpl sendBotMessageServiceImpl;
 
-    public TelegramBot(String botName, String botToken, SendBotMessageService sendBotMessageService) {
-        this.botName = botName;
-        this.botToken = botToken;
-        this.sendBotMessageService = sendBotMessageService;
+    public TelegramBot() {
+        this.sendBotMessageServiceImpl = new SendBotMessageServiceImpl(this);
         this.habit = new HashMap<>();
         this.db = new DataBaseConnection();
         SetMyCommands();
@@ -51,14 +56,12 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     private CommandContainer commandContainer;
     public void SetMyCommands() {
-        this.habit = new HashMap<>();
-        this.db = new DataBaseConnection();
         List<BotCommand> listofCommands = new ArrayList<>();
         listofCommands.add(new BotCommand("/start", "Начало работы"));
         listofCommands.add((new BotCommand("/help", "Как пользоваться ботом")));
         listofCommands.add(new BotCommand("/myhabits", "Мои привычки"));
         listofCommands.add(new BotCommand("/addhabit", "Добавить привычку"));
-        this.commandContainer = new CommandContainer(new SendBotMessageServiceImpl(this));
+        commandContainer = new CommandContainer(new SendBotMessageServiceImpl(this));
     }
 
 
@@ -70,13 +73,13 @@ public class TelegramBot extends TelegramLongPollingBot {
             Long userId = update.getMessage().getFrom().getId();
             User user = db.getUserById(userId);
             if (user.getUserState().equals("START")) {
-                CommandContainer command = new CommandContainer(sendBotMessageService);
+                CommandContainer command = new CommandContainer(sendBotMessageServiceImpl);
                 command.processCommand(update, this);
             }else if (user.getUserState().equals("HABIT")) {
                 db.addHabit(update, habit.get("NAME"), update.getMessage().getText());
                 habit = new HashMap<>();
                 db.editState(userId, "START");
-                sendBotMessageService.sendMessage(user.getUserId(), "Привычка успешно добавлена");
+                sendBotMessageServiceImpl.sendMessage(user.getUserId(), "Привычка успешно добавлена");
             }
         }
     }

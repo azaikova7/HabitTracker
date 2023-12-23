@@ -16,7 +16,6 @@ import java.util.List;
 public class SendBotMessageServiceImpl implements SendBotMessageService {
     private final TelegramBot telegramBot;
 
-    @Autowired
     public SendBotMessageServiceImpl(TelegramBot telegramBot) {
         this.telegramBot = telegramBot;
     }
