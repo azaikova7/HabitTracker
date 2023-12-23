@@ -5,7 +5,6 @@ public enum CommandName {
     HELP("/help"),
     MYHABITS("/myhabits"),
     ADDHABIT("/addhabit"),
-
     DELETEHABIT("/deletehabit"),
     NO("");
     private final String commandName;

@@ -1,20 +1,28 @@
 package org.habittracker.service;
 
+import com.jayway.jsonpath.Criteria;
+import lombok.Data;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
+import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
+import org.springframework.context.annotation.PropertySource;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.habittracker.model.User;
+import org.habittracker.service.DataBaseConnection;
 
 import java.util.List;
 
+
+@SuppressWarnings("ALL")
 public class DataBaseConnection {
-    private SessionFactory sessionFactory;
-    private Configuration configuration;
+    private final SessionFactory sessionFactory;
+
     public DataBaseConnection(){
-        configuration = new Configuration().configure();
+
+        Configuration configuration = new Configuration().configure();
         sessionFactory = configuration.buildSessionFactory();
     }
     public void closeSessionFactory() {
@@ -31,26 +39,27 @@ public class DataBaseConnection {
             try (Session session = sessionFactory.openSession()) {
                 Transaction transaction = session.beginTransaction();
                 User user = new User();
-                user.setChatId(userId);
-                user.setUserName(String.valueOf(userId));
-                user.setChatId(update.getMessage().getChatId());
+                user.setUserId(userId);
+                user.setUserName(update.getMessage().getFrom().getUserName());
+                user.setUserId(update.getMessage().getChatId());
+                user.setUserState("START");
                 session.save(user);
                 transaction.commit();
             }
         }
     }
-    public User getUserById(String userId) {
+    public User getUserById(Long userId) {
         try (Session session = sessionFactory.openSession()) {
             return session.get(User.class, userId);
         }
     }
-    public void addTask(Update update, String name, String userName){
-        User userTask = new User();
-        userTask.setChatId(update.getMessage().getFrom().getId());
-        userTask.setHabitName(name);
+    public void addHabit(Update update, String habit, String userName){
+        User userHabit = new User();
+        userHabit.setUserId(update.getMessage().getFrom().getId());
+        userHabit.setHabitName(habit);
         try (Session session = sessionFactory.openSession()) {
             Transaction transaction = session.beginTransaction();
-            session.save(userTask);
+            session.save(userHabit);
             transaction.commit();
         }
     }
@@ -74,51 +83,23 @@ public class DataBaseConnection {
             return userId;
         }
     }
-    public List<String> nameTask(Long userId){
+    public List<String> nameHabit(Long userId){
         try (Session session = sessionFactory.openSession()) {
-            String hql = "SELECT task.taskId FROM UserTask task WHERE task.responsibleId = :userId";
+            String hql = "SELECT user.habitName FROM User user WHERE user.userId = :userId";
             Query query = session.createQuery(hql);
             query.setParameter("userId", userId);
-            List<String> taskNames = query.list();
-
-            return taskNames;
+            List<String> habits = query.list();
+            return habits;
         }
     }
-    public List<String> nameTaskCreator(Long userId){
+
+    public List<String> getHabitsByUserId(Long userId) {
         try (Session session = sessionFactory.openSession()) {
-            String hql = "SELECT task.taskId FROM UserTask task WHERE task.creatorId = :userId";
+            String hql = "FROM User WHERE userId = :userId";
             Query query = session.createQuery(hql);
             query.setParameter("userId", userId);
-            List<String> taskNames = query.list();
-            return taskNames;
+            List<String> habits = query.list();
+            return habits;
         }
     }
-
-    /*public void deleteTaskByTaskName(String taskName) {
-        try (Session session = sessionFactory.openSession()) {
-            session.beginTransaction();
-            Criteria criteria = session.createCriteria(Habit.class);
-            criteria.add(Restrictions.eq("taskId", taskName));
-            Habit task = (Habit) criteria.uniqueResult();
-            session.delete(task);
-            session.getTransaction().commit();
-        }
-
-    }*/
-    public List<String> getTasksByUserId(Long userId) {
-        try (Session session = sessionFactory.openSession()) {
-            String hql = "FROM UserTask WHERE creatorId = :userId";
-            Query query = session.createQuery(hql);
-            query.setParameter("userId", userId);
-            List<String> tasks = query.list();
-            return tasks;
-        }
-    }
-
-    public User getUserById(Long userId) {
-        try (Session session = sessionFactory.openSession()) {
-            return session.get(User.class, userId);
-        }
-    }
-
 }

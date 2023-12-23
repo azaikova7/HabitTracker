@@ -9,12 +9,12 @@ import lombok.Getter;
 @Entity(name = "usersDataTable")
 public class User {
     @Id
-    private Long chatId;
+    private Long userId;
     private String userName;
     private String habitName;
     private String userState;
 
-    public void setChatId(Long chatId) {this.chatId = chatId;}
+    public void setUserId(Long userId) {this.userId = userId;}
     public void setUserName(String userName) {this.userName = userName;}
     public void setHabitName(String habitName) {
         this.habitName = habitName;
@@ -25,7 +25,7 @@ public class User {
     @Override
     public String toString() {
         return "User{" +
-                "chatId=" + chatId +
+                "userId=" + userId +
                 ", userName='" + userName + '\'' +
                 ", habitName='" + habitName + '\'' +
                 ", userState=" + userState + '\'' +

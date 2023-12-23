@@ -16,15 +16,15 @@ public class DeleteHabit {
     }
 
 
-    public void execute(Update update) {
+    public void execute(Update update, TelegramBot bot) {
         DataBaseConnection db = new DataBaseConnection();
-        List<String> taskNames = db.nameTaskCreator(update.getMessage().getFrom().getId());
-        ArrayList<String> task = new ArrayList<String>();
-        for (String i : taskNames){
-            task.add("DELETE " + i);
+        List<String> habits = db.getHabitsByUserId(update.getMessage().getFrom().getId());
+        ArrayList<String> habit = new ArrayList<String>();
+        for (String i : habits){
+            habit.add("DELETE " + i);
         }
         SendBotMessageServiceImpl sendCallback = new SendBotMessageServiceImpl(telegramBot);
-        sendCallback.execute(update, task, "Выберите задачу");
+        sendCallback.execute(update, habit, "Выберите задачу");
     }
 }
 
