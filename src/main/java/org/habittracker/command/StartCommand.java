@@ -1,7 +1,10 @@
 package org.habittracker.command;
 
 import org.habittracker.service.SendBotMessageService;
+import org.habittracker.service.TelegramBot;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 public class StartCommand implements Command{
     private final SendBotMessageService sendBotMessageService;

@@ -1,6 +1,7 @@
 package org.habittracker.command;
 
 import org.habittracker.service.SendBotMessageService;
+import org.habittracker.service.TelegramBot;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 public class HelpCommand implements Command{
@@ -23,6 +24,11 @@ public class HelpCommand implements Command{
 
     public HelpCommand(SendBotMessageService sendBotMessageService) {
         this.sendBotMessageService = sendBotMessageService;
+    }
+
+    @Override
+    public void execute(Update update, TelegramBot bot) {
+
     }
 
     @Override

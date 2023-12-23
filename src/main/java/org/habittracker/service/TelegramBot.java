@@ -10,17 +10,19 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
 
-import static org.habittracker.command.CommandName.NO;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -34,9 +36,24 @@ public class TelegramBot extends TelegramLongPollingBot {
     @Value("${bot.token}")
     String token;
 
-    public TelegramBot(BotConfig config) {
+    public DataBaseConnection db;
+
+
+    final String botToken;
+    private HashMap<String, String> task;
+
+
+    public TelegramBot(String botName, String botToken) {
+        this.botName = botName;
+        this.botToken = botToken;
+        this.task = new HashMap<>();
+        this.db = new DataBaseConnection();
+    }
+
+    public TelegramBot(BotConfig config, String botToken) {
 
         this.config = config;
+        this.botToken = botToken;
         List<BotCommand> listofCommands = new ArrayList<>();
         listofCommands.add(new BotCommand("/start", "Начало работы"));
         listofCommands.add((new BotCommand("/help", "Как пользоваться ботом")));
@@ -45,13 +62,14 @@ public class TelegramBot extends TelegramLongPollingBot {
         try {
             this.execute(new SetMyCommands(listofCommands, new BotCommandScopeDefault(), null));
         } catch (TelegramApiException e) {
-            log.error("Error setting bot's command list: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
     private CommandContainer commandContainer;
 
-    public TelegramBot() {
+    public TelegramBot(String botToken) {
+        this.botToken = botToken;
         this.commandContainer = new CommandContainer(new SendBotMessageServiceImpl(this));
     }
 
@@ -69,18 +87,60 @@ public class TelegramBot extends TelegramLongPollingBot {
     public void onUpdateReceived(Update update) {
         registerUser(update.getMessage());
         if (update.hasMessage() && update.getMessage().hasText()) {
-            String message = update.getMessage().getText().trim();
-            if (message.startsWith(COMMAND_PREFIX)) {
-                String commandIdentifier = message.split(" ")[0].toLowerCase();
+            registerUser(update.getMessage());
+            if (update.hasMessage() && update.getMessage().hasText()) {
+                String message = update.getMessage().getText().trim();
+                if (message.startsWith(COMMAND_PREFIX)) {
+                    String commandIdentifier = message.split(" ")[0].toLowerCase();
 
-                commandContainer.retrieveCommand(commandIdentifier).execute(update);
-            } else {
+                    commandContainer.retrieveCommand(commandIdentifier).execute(update);
+                } else {
 
-                commandContainer.retrieveCommand(NO.getCommandName()).execute(update);
+                    commandContainer.retrieveCommand(NO.getCommandName()).execute(update);
+                }
             }
         }
-
+        if (update.hasCallbackQuery()){
+            CallbackQuery callbackQuery = update.getCallbackQuery();
+            String data = callbackQuery.getData();
+            Long userId = callbackQuery.getFrom().getId();
+            if (data.startsWith("TASK")){
+                task.put("TASK", data);
+                ArrayList<String> action = new ArrayList<>(Arrays.asList("ACTION дедлайн", "ACTION описание", "ACTION статус", "ACTION выполняющий"));
+                SendCallBack send = new SendCallBack();
+                send.execute(update, this, action, "выберите действие");
+            }
+            if (data.startsWith("ACTION")){
+                task.put("ACTION", data);
+                db.editState(userId, "EDITTASK");
+                sendMessage("Введите новые данные", callbackQuery.getMessage().getChatId().toString());
+            }
+            /*if (data.startsWith("MYTASK")){
+                String message = db.infoTask(userId, data.split(" ")[1]);
+                sendMessage(message, callbackQuery.getMessage().getChatId().toString());
+            }
+            if (data.startsWith("DELETE")){
+                System.out.println(data.split(" ")[1]);
+                db.deleteTaskByTaskName(data.split(" ")[1]);
+                sendMessage("Задача успешно удалена", callbackQuery.getMessage().getChatId().toString());
+            }*/
+        }
     }
+
+
+    public void sendMessage(String chatId, String message) {
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(chatId);
+        sendMessage.enableHtml(true);
+        sendMessage.setText(message);
+
+        try {
+            execute(sendMessage);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     private void registerUser(Message msg) {
         if (userRepository.findById(msg.getChatId()).isEmpty()) {
@@ -89,10 +149,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
             User user = new User();
             user.setChatId(chatId);
-            user.setFirstName(chat.getFirstName());
-            user.setLastName(chat.getLastName());
             user.setUserName(chat.getUserName());
-            user.setRegisteredAt(new Timestamp(System.currentTimeMillis()));
             userRepository.save(user);
             log.info("user saved: " + user);
         }
